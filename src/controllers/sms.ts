@@ -10,18 +10,19 @@ export const sendCode = async (req: Request, res: Response) => {
     const { code, phone } = req.body
 
     if (code && phone) {
-      const message = `[ListaPix] Seu token de acesso: ${code}.`
+      const message = `[ListaPix] Seu token de acesso: *${code}*.`
 
       const requestHeaders = new Headers()
 
       requestHeaders.append("Content-Type", "application/json")
       requestHeaders.append("Client-Token", service.clientToken)
 
-      await fetch(`${service.baseUrl}/send-text`, {
+      await fetch(`${service.baseUrl}/send-button-otp`, {
         method: "POST",
         body: JSON.stringify({
           phone,
           message,
+          code: `${code}`
         }),
         headers: requestHeaders,
       })
