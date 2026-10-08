@@ -2,39 +2,47 @@ import { Request, Response } from "express"
 
 export const sendCode = async (req: Request, res: Response) => {
   try {
+    const serviceToken = process.env.SMS_SERVICE_ACCOUNT_API_KEY as string
+    const serviceUrl = process.env.SMS_SERVICE_URL as string
+
     const service = {
-      baseUrl: process.env.WHATSAPP_SERVICE_BASE_URL as string,
-      clientToken: process.env.WHATSAPP_SERVICE_CLIENT_TOKEN as string,
+      token: serviceToken,
+      url: serviceUrl,
     }
 
     const { code, phone } = req.body
 
     if (code && phone) {
-      const message = `[ListaPix] Seu token de acesso: *${code}*.`
+      const message = `[ListaPix] Seu token de acesso: ${code}.`
 
-      const requestHeaders = new Headers()
+      const cleanPhone = `0${phone.replace(/\D/g, "")}`
 
-      requestHeaders.append("Content-Type", "application/json")
-      requestHeaders.append("Client-Token", service.clientToken)
+      const body = {
+        Sender: "webstore",
+        Receivers: cleanPhone,
+        Content: message,
+      }
 
-      await fetch(`${service.baseUrl}/send-button-otp`, {
+      await fetch(service.url, {
         method: "POST",
-        body: JSON.stringify({
-          phone,
-          message,
-          code: `${code}`
-        }),
-        headers: requestHeaders,
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          "auth-key": service.token,
+        },
       })
-        .then(async (response) => {
-          const result = await response.json()
-          const success = response.status === 200 && !!result.messageId
+        .then(async (result) => {
+          const resData = await result.json()
 
-          if (success) res.status(200).json({ sended: success })
-          else
-            throw new Error(
-              "Houve um erro ao enviar o código. Tente novamente mais tarde"
-            )
+          if (resData.Success) {
+            res.status(200).json({ sended: true })
+          } else {
+            res.status(400).json({
+              sended: false,
+              error:
+                "Houve um erro ao enviar o código. Tente novamente mais tarde.",
+            })
+          }
         })
         .catch((err) => {
           throw new Error(
@@ -48,8 +56,4 @@ export const sendCode = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(400).json({ sended: false, error })
   }
-}
-
-export const ping = async (req: Request, res: Response) => {
-  return res.json({ pong: true })
 }
