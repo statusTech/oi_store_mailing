@@ -32,7 +32,8 @@ routes.get("/", (req: Request, res: Response) => {
 
 // @ts-ignore
 routes.post("/api/sendemail", cpUpload, MailController.sendEmail)
-routes.post("/api/sendcode", SmsController.sendCode)
+routes.post("/api/sendcode/sms", SmsController.sendCode)
+routes.post("/api/sendcode", WhatsappController.sendCode)
 routes.post("/api/sendwhatsapp", WhatsappController.sendWhatsapp)
 
 export default routes
