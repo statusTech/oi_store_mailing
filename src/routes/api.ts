@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express"
 import * as MailController from "../controllers/mail"
 import * as SmsController from "../controllers/sms"
 import * as WhatsappController from "../controllers/whatsapp"
+import * as AlertController from "../controllers/alert"
 
 import multer from "multer"
 import path from "path"
@@ -35,5 +36,7 @@ routes.post("/api/sendemail", cpUpload, MailController.sendEmail)
 routes.post("/api/sendcode/sms", SmsController.sendCode)
 routes.post("/api/sendcode", WhatsappController.sendCode)
 routes.post("/api/sendwhatsapp", WhatsappController.sendWhatsapp)
+// Alerta operacional do backend (KAN-292), protegido por ALERT_SECRET
+routes.post("/api/alert", AlertController.sendAlert)
 
 export default routes
